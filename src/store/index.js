@@ -9,7 +9,6 @@ import mutations from './mutations'
 import createLogger from 'vuex/dist/logger'
 
 Vue.use(Vuex)
-console.log(Vuex)
 
 const debug = process.env.NODE_ENV !== 'production'
 

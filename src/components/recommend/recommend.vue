@@ -73,10 +73,12 @@ export default {
             })
         },
         loadImage() {
-            if(!this.checkLoad) {
-                this.$refs.scroll.refresh();
-                this.checkLoad = true;
-            }
+            setTimeout(() => {
+                if(!this.checkLoad) {
+                    this.$refs.scroll.refresh();
+                    this.checkLoad = true;
+                }
+            }, 20);
         }
     }
 }
