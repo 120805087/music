@@ -1,3 +1,4 @@
+
 export function addClass(el,className){
     if(hasClass(el,className)) {
         return
@@ -23,4 +24,37 @@ export function getData(el,name,val){
     }else {
         return el.getAttribute(name);
     }
+}
+
+/*自定义一个prefix*/
+
+let elementStyle = document.createElement('div').style;
+
+let vender = (() => {
+    let eleTransformName = {
+        webkit: 'webkitTramsform',
+        Moz: 'MozTransform',
+        O: 'Otransform',
+        ms: 'msTransform',
+        standard: 'transform'
+    }
+    for(let key in eleTransformName) {
+        if(elementStyle[eleTransformName[key]] !== undefined) {
+            return key
+        }
+    }
+
+    return false
+})()
+
+export function prefixStyle(style) {
+    if(vender === false) {
+        return false
+    }
+
+    if(vender === 'standard') {
+        return style
+    }
+
+    return vender + style.charAt(0).toUpperCase() + style.substr(1)
 }
