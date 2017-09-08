@@ -1,5 +1,5 @@
 <template lang="html">
-    <div class="recommend">
+    <div class="recommend" ref="recommend">
         <scroll ref="scroll" class="recommend-content" :data="discList">
             <div>
                 <div class="slider-wrapper" v-if="recommends.length">
@@ -14,7 +14,7 @@
                 <div class="recommend-list">
                     <h1 class="list-title">热门歌单推介</h1>
                     <ul>
-                        <li v-for="item in discList" class="item">
+                        <li @click="selectDisc(item)" v-for="item in discList" class="item">
                             <div class="icon">
                                 <img width="60" height="60" v-lazy="item.imgurl" alt="">
                             </div>
@@ -30,6 +30,7 @@
                 <loading title="图片正在加载..."></loading>
             </div>
         </scroll>
+        <router-view></router-view>
     </div>
 </template>
 
@@ -39,7 +40,12 @@ import Slider from 'base/slider/slider'
 import Loading from 'base/loading/loading'
 import {getReaommend,getDiscList} from 'api/recommend'
 import {ERR_OK} from 'api/config'
+import {playlistMixin} from 'common/js/mixin'
+import {mapMutations} from 'vuex'
 export default {
+    mixins: [
+        playlistMixin
+    ],
     data() {
         return {
             recommends: [],
@@ -56,11 +62,21 @@ export default {
         this._getDiscList()
     },
     methods: {
+        handlePlaylist(playlist) {
+            const bottom = playlist.length ? '60px' : '0'
+            this.$refs.recommend.style.bottom = bottom
+            this.$refs.scroll.refresh()
+        },
+        selectDisc(item) {
+            this.$router.push({
+                path: `/recommend/${item.dissid}`
+            })
+            this.setDisc(item)
+        },
         _getRecommend() {
             getReaommend().then((res) => {
                 if(res.code === ERR_OK){
                     this.recommends = res.data.slider;
-                    console.log(res.data.slider);
                 }
             })
         },
@@ -68,7 +84,6 @@ export default {
             getDiscList().then((res) => {
                 if(res.code === ERR_OK) {
                     this.discList = res.data.list;
-                    console.log(res.data.list)
                 }
             })
         },
@@ -79,7 +94,10 @@ export default {
                     this.checkLoad = true;
                 }
             }, 20);
-        }
+        },
+        ...mapMutations({
+            setDisc: 'SET_DISC'
+        })
     }
 }
 </script>

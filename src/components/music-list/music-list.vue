@@ -6,7 +6,7 @@
         <h1 class="title" v-html="title"></h1>
         <div class="bg-image" :style="bgStyle" ref="bgImage">
             <div class="play-warpper" ref="play" v-show="songs.length>0">
-                <div class="play">
+                <div class="play" @click="random">
                     <i class="icon-play"></i>
                     <span class="text">随机播放列表</span>
                 </div>
@@ -16,7 +16,7 @@
         <div class="bg-layer" ref="layer"></div>
         <scroll @scroll="scroll" :data="songs" :probe-type="probeType" :listen-scroll="listenScroll" class="list" ref="list">
             <div class="song-list-wrapper">
-                <song-list @select="selectItem" :songs="songs"></song-list>
+                <song-list :rank="rank" @select="selectItem" :songs="songs"></song-list>
             </div>
             <div class="loading-warppre" v-show="!songs.length">
                 <loading></loading>
@@ -31,12 +31,14 @@ import SongList from 'base/song-list/song-list'
 import {prefixStyle} from 'common/js/dome'
 import Loading from 'base/loading/loading'
 import {mapActions} from 'vuex'
+import {playlistMixin} from 'common/js/mixin'
 
 const RESERVED_HEIGHT = 40;
 const transform = prefixStyle('transform');
 const backdrop = prefixStyle('backdrop-filter');
 
 export default {
+    mixins: [playlistMixin],
     props: {
         bgImage: {
             type: String,
@@ -49,6 +51,10 @@ export default {
         title: {
             type: String,
             default: ''
+        },
+        rank: {
+            type: Boolean,
+            default: false
         }
     },
     data() {
@@ -66,6 +72,11 @@ export default {
         this.probeType = 3
     },
     methods: {
+        handlePlaylist(playlist) {
+            const bottom = playlist.length ? '60px' : '0'
+            this.$refs.list.$el.style.bottom = bottom
+            this.$refs.list.refresh()
+        },
         back() {
             this.$router.back()
         },
@@ -78,8 +89,14 @@ export default {
                 index
             })
         },
+        random() {
+            this.randomPlay({
+                list: this.songs
+            })
+        },
         ...mapActions([
-            'selectPlay'
+            'selectPlay',
+            'randomPlay'
         ])
     },
     mounted() {
