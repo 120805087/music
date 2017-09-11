@@ -1,12 +1,13 @@
 <template lang="html">
     <div class="search-box">
         <i class="icon-search"></i>
-        <input class="box" v-model="query" type="text" :placeholder="placeholder">
+        <input ref="imput" class="box" v-model="query" type="text" :placeholder="placeholder">
         <i @click="clear" v-show="query" class="icon-dismiss"></i>
     </div>
 </template>
 
 <script>
+import {debounce} from 'common/js/unit'
 export default {
     props: {
         placeholder: {
@@ -25,12 +26,15 @@ export default {
         },
         clear() {
             this.query = ''
+        },
+        blur() {
+            this.$refs.imput.blur()
         }
     },
     created() {
-        this.$watch('query',(newQuery) => {
+        this.$watch('query',debounce((newQuery) => {
             this.$emit('query',newQuery)
-        })
+        },200))
     }
 }
 </script>
@@ -59,7 +63,7 @@ export default {
             font-size: $font-size-medium
             &::placeholder
                 color: $color-text-d
-        .icon-dismiss
+       .icon-dismiss
             font-size: 16px
             color: $color-background
 </style>

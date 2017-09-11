@@ -16,8 +16,9 @@
             </div>
         </div>
         <div v-show="query" class="search-result">
-            <suggest :query="query"></suggest>
+            <suggest @select="select" @listScroll="blurInput" :query="query"></suggest>
         </div>
+        <router-view></router-view>
     </div>
 </template>
 
@@ -37,11 +38,17 @@ export default {
         this._getHotKey()
     },
     methods: {
+        blurInput() {
+            this.$refs.searchBox.blur()
+        },
         onQueryChange(query) {
             this.query = query
         },
         setSearchQuery(key) {
             this.$refs.searchBox.setSearchQuery(key)
+        },
+        select() {
+
         },
         _getHotKey() {
             getHotKey().then((res) => {

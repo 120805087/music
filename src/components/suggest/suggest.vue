@@ -1,7 +1,7 @@
 <template lang="html">
-    <scroll :pullup="pullup" :data="result" class="suggest" @scrollToEnd="searchMore">
+    <scroll :beforeScroll="beforeScroll" :pullup="pullup" :data="result" class="suggest" @scrollToEnd="searchMore" @beforeScroll="listScroll">
         <ul class="suggest-list">
-            <li class="suggest-item" v-for="item in result">
+            <li @click="selectItem(item)" class="suggest-item" v-for="item in result">
                 <div class="icon">
                     <i :class="getIconCls(item)"></i>
                 </div>
@@ -11,6 +11,9 @@
             </li>
             <loading v-show="hasMore" title=""></loading>
         </ul>
+        <div v-show="!hasMore && !result.length" class="no-result-wrapper">
+            <no-result title="抱歉!您搜索的结果不存在"></no-result>
+        </div>
     </scroll>
 </template>
 
@@ -20,8 +23,13 @@ import {ERR_OK} from 'api/config'
 import {getSong} from 'common/js/song'
 import Scroll from 'base/scroll/scroll'
 import Loading from 'base/loading/loading'
+import Singer from 'common/js/singer'
+import NoResult from 'base/no-result/no-result'
+import {mapMutations,mapActions} from 'vuex'
+
 const TYPE_SINGGER = 'singer'
 const perpage = 20
+
 export default {
     props: {
         query: {
@@ -38,6 +46,7 @@ export default {
             page: 1,
             result: [],
             pullup: true,
+            beforeScroll: true,
             hasMore: true
         }
     },
@@ -55,6 +64,24 @@ export default {
             }else{
                 return `${item.name}-${item.singer}`
             }
+        },
+        listScroll() {
+            this.$emit('listScroll')
+        },
+        selectItem(item) {
+            if(item.type === TYPE_SINGGER) {
+                const singer = new Singer({
+                    id: item.singermid,
+                    name: item.singername
+                })
+                this.$router.push({
+                    path: `/search/${singer.id}`
+                })
+                this.setSinger(singer)
+            }else{
+                this.insertSong(item)
+            }
+            this.$emit('select')
         },
         search() {
             this.page = 1
@@ -91,7 +118,6 @@ export default {
             if(searchData.song) {
                 ret = ret.concat(this._normalizeSongs(searchData.song.list))
             }
-            console.log(ret)
             return ret
         },
         _normalizeSongs(list) {
@@ -102,7 +128,13 @@ export default {
                 }
             })
             return ret
-        }
+        },
+        ...mapMutations({
+            setSinger: 'SET_SINGER'
+        }),
+        ...mapActions([
+            'insertSong'
+        ])
     },
     watch: {
         query() {
@@ -111,7 +143,8 @@ export default {
     },
     components: {
         Scroll,
-        Loading
+        Loading,
+        NoResult
     }
 }
 </script>
@@ -142,8 +175,8 @@ export default {
                     .text
                         no-wrap()
         .no-result-wrapper
-         position: absolute
-         width: 100%
-         top: 50%
-         transform: translateY(-50%)
+            position: absolute
+            width: 100%
+            top: 50%
+            transform: translateY(-50%)
 </style>
