@@ -1,5 +1,5 @@
 <template lang="html">
-    <scroll :beforeScroll="beforeScroll" :pullup="pullup" :data="result" class="suggest" @scrollToEnd="searchMore" @beforeScroll="listScroll">
+    <scroll ref="suggestList" :beforeScroll="beforeScroll" :pullup="pullup" :data="result" class="suggest" @scrollToEnd="searchMore" @beforeScroll="listScroll">
         <ul class="suggest-list">
             <li @click="selectItem(item)" class="suggest-item" v-for="item in result">
                 <div class="icon">
@@ -67,6 +67,9 @@ export default {
         },
         listScroll() {
             this.$emit('listScroll')
+        },
+        refresh() {
+            this.$refs.suggestList.refresh()
         },
         selectItem(item) {
             if(item.type === TYPE_SINGGER) {
