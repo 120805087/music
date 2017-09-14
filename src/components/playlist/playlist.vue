@@ -11,13 +11,13 @@
                         </span>
                     </h1>
                 </div>
-                <scroll ref="playlist" :data="sequencelist" class="list-content">
+                <scroll :refreshDelay="refreshDelay" ref="playlist" :data="sequencelist" class="list-content">
                     <transition-group name="list" tag="ul">
                         <li :key="item.id" ref="playItem" class="item" v-for="(item,index) in sequencelist" @click="selectItem(item,index)">
                             <i class="current" :class="getCurrentIcon(item)"></i>
                             <span class="text">{{item.name}}</span>
-                            <span class="like">
-                                <i class="icon-not-favorite"></i>
+                            <span class="like" @click.stop="toggleFavorite(item)">
+                                <i :class="getFavoriteIcon(item)"></i>
                             </span>
                             <span class="delete" @click.stop="deleteOne(item)">
                                 <i class="icon-delete"></i>
@@ -53,7 +53,8 @@
         ],
         data() {
             return {
-                showFlag: false
+                showFlag: false,
+                refreshDelay: 100
             }
         },
         computed: {

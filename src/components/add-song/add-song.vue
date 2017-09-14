@@ -18,9 +18,9 @@
                             <song-list :songs="playHistory" @select="selectSong"></song-list>
                         </div>
                     </scroll>
-                    <scroll ref="searchList" v-if="currentIndex === 1" class="list-scroll" :data="searchHistory">
+                    <scroll :refreshDelay="refreshDelay" ref="searchList" v-if="currentIndex === 1" class="list-scroll" :data="searchHistory">
                         <div class="list-inner">
-                            <search-list :searchs="searchHistory" @select="setSearchQuery" @delete="deleteSearchHistory" ></search-list>
+                            <search-list :searchs="searchHistory" @select="selectSuggest" @delete="deleteSearchHistory" ></search-list>
                         </div>
                     </scroll>
                 </div>
@@ -28,6 +28,12 @@
             <div class="search-result" v-show="query">
                 <suggest ref="suggest" @select="saveSearch" @listScroll="blurInput" :query="query" :showSinger="showSinger"></suggest>
             </div>
+            <top-tip ref="topTip">
+                <div class="tip-title">
+                    <i class="icon-ok"></i>
+                    <span class="text">添加一首歌曲成功</span>
+                </div>
+            </top-tip>
         </div>
     </transition>
 </template>
@@ -40,6 +46,7 @@
     import SongList from 'base/song-list/song-list'
     import Song from 'common/js/song'
     import SearchList from 'base/search-list/search-list'
+    import TopTip from 'base/top-tip/top-tip'
 
     import {mapGetters,mapActions} from 'vuex'
 
@@ -76,13 +83,21 @@
             hide() {
                 this.showFlag = false
             },
+            selectSuggest() {
+                this.setSearchQuery()
+                this.showTopTip()
+            },
             selectIndex(index) {
                 this.currentIndex = index
             },
             selectSong(song,index) {
                 if(index !== 0) {
                     this.insertSong(new Song(song))
+                    this.showTopTip()
                 }
+            },
+            showTopTip() {
+                this.$refs.topTip.show()
             },
             ...mapActions([
                 'insertSong'
@@ -94,7 +109,8 @@
             Switches,
             Scroll,
             SongList,
-            SearchList
+            SearchList,
+            TopTip
         }
     }
 </script>

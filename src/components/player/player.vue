@@ -65,8 +65,8 @@
                     <div class="icon i-right" :class="disable">
                         <i @click="next" class="icon-next"></i>
                     </div>
-                    <div class="icon i-right">
-                        <i class="icon icon-not-favorite"></i>
+                    <div class="icon i-right" @click="toggleFavorite(currentSong)">
+                        <i class="icon" :class="getFavoriteIcon(currentSong)"></i>
                     </div>
                 </div>
             </div>
@@ -92,7 +92,7 @@
         </div>
         </transition>
         <playlist ref="playlist"></playlist>
-        <audio ref="audio" :src="currentSong.url" @canplay="ready" @error="error" @timeupdate="updateTime" @ended="end"></audio>
+        <audio ref="audio" :src="currentSong.url" @play="ready" @error="error" @timeupdate="updateTime" @ended="end"></audio>
     </div>
 </template>
 
@@ -225,6 +225,7 @@ export default {
             }
             if( this.playlist.length === 1) {
                 this.loop()
+                return
             }else{
                 let index = this.currentIndex + 1
                 if(index > this.playlist.length - 1) {
@@ -243,6 +244,7 @@ export default {
             }
             if( this.playlist.length === 1) {
                 this.loop()
+                return
             }else{
                 let index = this.currentIndex - 1
                 if(index === -1) {
@@ -283,6 +285,9 @@ export default {
         },
         getLylic() {
             this.currentSong._getLylic().then((lyric) => {
+                if(this.currentSong.lyric !== lyric) {
+                    return
+                }
                 this.currentLyric = new Lyric(lyric,this.handlerLine)
                 if(this.playing) {
                     this.currentLyric.play()
@@ -395,7 +400,8 @@ export default {
             if(this.currentLyric) {
                 this.currentLyric.stop()
             }
-            setTimeout(() => {
+            clearTimeout(this.timer)
+            this.timer = setTimeout(() => {
                 this.$refs.audio.play()
                 this.getLylic()
             }, 1000)
